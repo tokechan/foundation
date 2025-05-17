@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import './App.css'
 
 
@@ -17,6 +18,8 @@ function App() {
       name: "ハウルの動く城",
       image:
         "https://media.themoviedb.org/t/p/w300_and_h450_bestv2/v0K2e1t6ocUNnkZ9BeiFdcOT9LG.jpg",
+      overview:
+        "ハウルの動く城は、魔法使いのゾーンと、その城の住人であるハウルとメイドのゾロが主人公の物語です。ハウルは魔法使いのゾーンに住む少年で、魔法を使って様々なものを動かすことができます。ハウルは魔法使いのゾーンの女王であるメイドのゾロを助けるために、魔法使いのゾーンの城を動かすことになります。",
     },
     {
       id: 3,
@@ -31,15 +34,43 @@ function App() {
         "https://media.themoviedb.org/t/p/w300_and_h450_bestv2/oHaxzQXWSvIsctZfAYSW0tn54gQ.jpg",
     },
   ];
+  const fetchMovieList = async () => {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/popular?language=ja&page=1`,
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_KEY}`,
+        },
+      }
+    );
+    const data = await response.json();
+    console.log(data.results);
+    setMovieList(data.results);
+  };
+
+  
+  const [keyword, setKeyword] = useState("");
+  const [movieList, setMovieList] = useState([]);
+  
+  useEffect(() => {
+    fetchMovieList();
+  }, []);
 
   return (
-    <div>
-      {defaultMovieList.map((movie) => (
-      <div key={movie.id}>
-        <h2>{movie.name}</h2>
-        <img src={movie.image} alt={movie.name} />
-        <p>{movie.overview}</p>
-      </div>
+     <div>
+         <div>{keyword}</div>
+        <input type="text" onChange={(e) => setKeyword(e.target.value)} />
+        {movieList
+          .filter((movie) => movie.original_title.includes(keyword))
+          .map((movie) => (
+          <div key={movie.id}>
+            <h2>{movie.original_title}</h2>
+            <img 
+            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
+            alt={movie.original_title} 
+            />
+          <p>{movie.overview}</p>
+          </div>
       ))}
     </div>
   )
