@@ -27,33 +27,37 @@ type MovieJson = {
 };
 
 function App() {
- const fetchMovieList = async () => {
-    const response = await fetch(
-      `https://api.themoviedb.org/3/movie/popular?language=ja&page=1`,
-      {
+  
+  const fetchMovieList = async () => {
+    const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+    let url ="";
+    if(keyword) {
+      url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(keyword)}&include_adult=false&language=ja&page=1`;
+    } else {
+      url = `https://api.themoviedb.org/3/movie/popular?language=ja&page=1`;
+    }
+    const response = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_KEY}`,
+          Authorization: `Bearer ${API_KEY}`,
         },
-      }
-    );
+    });
     const data = await response.json();
-    setMovieList(
-      data.results.map((movie: Movie) => ({
-        id: movie.id,
-        original_title: movie.original_title,
-        poster_path: movie.poster_path,
-        overview: movie.overview,
-      }))
-    );
+    const result = data.results;
+    const movieList = result.map((movie: MovieJson) => ({
+      id: movie.id,
+      original_title: movie.original_title,
+      poster_path: movie.poster_path,
+      overview: movie.overview,
+    }));
+    setMovieList(movieList);
   };
 
-  
   const [keyword, setKeyword] = useState("");
   const [movieList, setMovieList] = useState<Movie[]>([]);
   
   useEffect(() => {
     fetchMovieList();
-  }, []);
+  }, [keyword]);
 
   return (
      <div>
